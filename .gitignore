@@ -1,0 +1,15 @@
+__pycache__/
+*.xlsx
+credentials.json
+*.png
+*.txt
+token.pickle
+microsoft_graph.py
+
+appendForm.js
+logo.svg
+serviceWorker.js
+setupTests.js
+App.test.js
+index.css
+index.js
