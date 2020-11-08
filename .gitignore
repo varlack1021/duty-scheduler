@@ -13,3 +13,6 @@ setupTests.js
 App.test.js
 index.css
 index.js
+package-lock.json
+package.json
+yarn.lock
