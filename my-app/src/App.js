@@ -11,143 +11,132 @@ import Card from "react-bootstrap/Card";
 import Dropdown from "react-bootstrap/Dropdown";
 
 function App() {
-  let [formData, setFormData] = useState([{}]);
-  let [staffData, setStaffData] = useState({
-    name: "",
-    preferences: {},
+  let [formData, setFormData] = useState({
+    hall: "",
+    startDate: "",
+    endDate: "",
   });
 
-  let [date, setDate] = useState([]);
-  let [startDate, setStartDate] = useState();
-  let [endDate, setEndDate] = useState();
+  let [staffData, setStaffData] = useState([
+    {
+      name: "",
+      preferences: [""],
+    },
+  ]);
 
   const sendFormData = async (formEvent) => {
     formEvent.preventDefault();
-    console.log(formEvent);
+
+    formData.staffData = staffData;
+    console.log(formData);
+
     const requestOptions = {
       method: "POST",
       body: JSON.stringify(formData),
     };
 
-    let response = await fetch(
+    /*let response = await fetch(
       "https://localhost:8000/schedule_duty",
       requestOptions
     );
 
     setFormData({ video_link: "" });
+  */
   };
-  
-  function appendFormData() {
-    setFormData([...formData, staffData]);
-    setStaffData({ name: "", hall: "" });
-        console.log(formData);
 
+  function appendStaffMember(index, input) {
+    staffData[index].name = input;
+    setStaffData(staffData);
   }
 
-  function appendDates(){
-    console.log(staffData)
-    let i;
-    for (i=startDate; i<=endDate; i++) {
-      setDate(date.push({[i]: []}))
-    }
+  function addStaffMember() {
+    let data = { name: "", preferences: [""] };
+    setStaffData([...staffData, data]);
   }
-  //we can just say completed
+
+  function appendDates(index, index2, input) {
+    staffData[index].preferences[index2] = input;
+    setStaffData(staffData);
+  }
+
+  function addDate(index) {
+    console.log(staffData, index.index);
+    staffData[index.index].preferences.push(" ");
+    setStaffData([...staffData]);
+  }
 
   return (
-    <Container>
+    <div className="App"> </div>
+    <React.Fragment>
+    <div className = "App-header"> </div>
+    <Container >
       <Form className="mt-5" onSubmit={(formEvent) => sendFormData(formEvent)}>
-        <Form.Label>Duty Schedule Options</Form.Label>
+        <Form.Label>Duty Scheduling Options</Form.Label>
         <Form.Row>
           <Form.Group>
-            <Col xs={"auto"}>
-              <Form.Label>First Month</Form.Label>
-              <Form.Control
-                as="select"
-                custom
-                onChange={(inputEvent) => setStartDate(inputEvent.target.value)}
-              >
-                <option value="0"> Choose </option>
-                <option value="1"> January </option>
-                <option value="2"> February </option>
-                <option value="3"> March </option>
-                <option value="4"> April </option>
-                <option value="5"> May </option>
-                <option value="6"> June </option>
-                <option value="7"> July </option>
-                <option value="8"> August </option>
-                <option value="9"> September </option>
-                <option value="10"> October </option>
-                <option value="11"> November </option>
-                <option value="12"> December </option>
-              </Form.Control>
-            </Col>
+            <Form.Label>Start Date</Form.Label>
+            <Form.Control
+              type="date"
+              onChange={(inputEvent) =>
+                setFormData({ ...formData, startDate: inputEvent.target.value })
+              }
+            ></Form.Control>
           </Form.Group>
 
           <Form.Group>
             <Col xs={"auto"}>
-              <Form.Label>Last Month</Form.Label>
+              <Form.Label>End Date</Form.Label>
               <Form.Control
-                as="select"
-                custom
-                onChange={(inputEvent) => setEndDate(inputEvent.target.value)}
-              >
-                <option value="0"> Choose </option>
-                <option value="1"> January </option>
-                <option value="2"> February </option>
-                <option value="3"> March </option>
-                <option value="4"> April </option>
-                <option value="5"> May </option>
-                <option value="6"> June </option>
-                <option value="7"> July </option>
-                <option value="8"> August </option>
-                <option value="9"> September </option>
-                <option value="10"> October </option>
-                <option value="11"> November </option>
-                <option value="12"> December </option>
-              </Form.Control>
+                type="date"
+                onChange={(inputEvent) =>
+                  setFormData({ ...formData, endDate: inputEvent.target.value })
+                }
+              ></Form.Control>
             </Col>
           </Form.Group>
-                  <Button variant="primary" size="sm" onClick={appendDates}>
-          Confirm
-        </Button>
         </Form.Row>
         <Form.Group>
           <Form.Control
-            type="url"
+            type="text"
             placeholder="Enter Hall Name"
-
             onChange={(inputEvent) =>
-              setFormData([...formData, 0: { hall: inputEvent.target.value }])
+              setFormData({ ...formData, hall: inputEvent.target.value })
             }
-            value={formData.hall}
           />
         </Form.Group>
-        {formData.map((data, index) => (
+        {staffData.map((data, index) => (
           <React.Fragment>
             <Form.Group key={index}>
-            <Form.Label> Name </Form.Label>
+              <Form.Label> Name </Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter staff member name"
                 onChange={(inputEvent) =>
-
-                  setFormData([...formData, data ])
+                  appendStaffMember(index, inputEvent.target.value)
                 }
               />
             </Form.Group>
-
+            <Form.Label>Days Cannot Sit</Form.Label>
             <Form.Row>
-              <Form.Group>
-                <Col xs={"auto"}>
-                  <Form.Label> Dates </Form.Label>
-                  <Form.Control placeholder="Enter dates seperated by a comma" 
-                  type="text"
-                  placeholder="Enter dates"
-                  onChange={(inputEvent) =>
-                    setFormData([{ ...formData, [index]: {...formData.index, "date":inputEvent.target.value, } }])
-                  }/>
-                </Col>
-              </Form.Group>
+              {staffData[index].preferences.map((input, index2) => (
+                <React.Fragment>
+                  <Col xs="auto">
+                    <Form.Group key={index}>
+                      <Form.Control
+                        type="date"
+                        onChange={(inputEvent) =>
+                          appendDates(index, index2, inputEvent.target.value)
+                        }
+                      />
+                    </Form.Group>
+                  </Col>
+                </React.Fragment>
+              ))}
+              <Col>
+                <Button variant="secondary" onClick={() => addDate({ index })}>
+                  Add date
+                </Button>
+              </Col>
             </Form.Row>
           </React.Fragment>
         ))}
@@ -156,11 +145,12 @@ function App() {
           Submit
         </Button>
 
-        <Button variant="secondary" onClick={appendFormData}>
+        <Button variant="secondary" onClick={addStaffMember}>
           add staff member
         </Button>
       </Form>
     </Container>
+    </React.Fragment>
   );
 }
 
