@@ -1,6 +1,8 @@
 import time
+import json
 
 from flask_apscheduler import APScheduler
+from flask_cors import CORS 
 from flask import Flask, request, make_response, redirect, url_for, send_from_directory, send_file
 
 from duty_sms_notifications import send_text_notification
@@ -11,6 +13,7 @@ from datetime import datetime, timedelta
 from pprint import pprint
 
 app = Flask(__name__)
+CORS(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
@@ -93,7 +96,9 @@ def schedule_events():
 
 @app.route('/schedule_duty',methods=['POST'])
 def schedule_duty():
-	print(request.args)
+	print(json.loads(request.data))
+	start_schedule(json.loads(request.data))
+	return("Connection")
 
 @app.route('/add_duty_to_caledar')
 def add_duty_to_calendar():
@@ -108,6 +113,7 @@ def remove_event(event_date, number):
 
 if __name__ == "__main__":
 	#main()
-	app.run(host='localhost', debug=True, port=8000, ssl_context='adhoc')
+	app.run(host='localhost', debug=True, port=8000)
+	#https = ssl_context='adhoc'
 	#schedule_events(54)
 	#time.sleep(1455)

@@ -32,16 +32,17 @@ function App() {
 
     const requestOptions = {
       method: "POST",
+      'Content-Type': 'application/json',
       body: JSON.stringify(formData),
     };
 
-    /*let response = await fetch(
-      "https://localhost:8000/schedule_duty",
+    let response = await fetch(
+      "http://localhost:8000/schedule_duty",
       requestOptions
     );
 
-    setFormData({ video_link: "" });
-  */
+    //setFormData({ video_link: "" });
+  
   };
 
   function appendStaffMember(index, input) {
@@ -66,10 +67,9 @@ function App() {
   }
 
   return (
-    <div className="App"> </div>
-    <React.Fragment>
-    <div className = "App-header"> </div>
-    <Container >
+
+   <div className ="App-background">
+    <Container className="App">
       <Form className="mt-5" onSubmit={(formEvent) => sendFormData(formEvent)}>
         <Form.Label>Duty Scheduling Options</Form.Label>
         <Form.Row>
@@ -95,7 +95,7 @@ function App() {
             </Col>
           </Form.Group>
         </Form.Row>
-        <Form.Group>
+        <Form.Group className="input-box">
           <Form.Control
             type="text"
             placeholder="Enter Hall Name"
@@ -106,7 +106,7 @@ function App() {
         </Form.Group>
         {staffData.map((data, index) => (
           <React.Fragment>
-            <Form.Group key={index}>
+            <Form.Group key={index} className="input-box">
               <Form.Label> Name </Form.Label>
               <Form.Control
                 type="text"
@@ -150,7 +150,8 @@ function App() {
         </Button>
       </Form>
     </Container>
-    </React.Fragment>
+    </div>
+    
   );
 }
 

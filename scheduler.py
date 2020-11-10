@@ -6,6 +6,7 @@ from openpyxl import load_workbook
 from datetime import datetime
 from collections import defaultdict
 from excel_calendar import create_excel_calendar
+from pprint import pprint
 
 # are lists objects?
 # list of dates we do not  want to sit
@@ -208,12 +209,32 @@ def convert_excel_date(duty_dates):
     print(duty_dates)
     return duty_dates
 
-def start_schedule():
-    year = 2020
-    start_date = [9, 7]
-    months = [10]
-    staff = ['Anya', 'Chris', 'Chelsea', 'Nate', 'Veronica', 'Juan']
+def start_schedule(data):
+    start_date = datetime.strptime(data['startDate'], '%Y-%m-%d')
+    end_date = datetime.strptime(data['endDate'], '%Y-%m-%d')
+
+    months = [x for x in range(start_date.month, end_date.month + 1)]
+    year =  start_date.year
+    start_date = [start_date.month, start_date.day]
     
+    filename = '{} {} RA Duty'.format(year, data['hall'])
+
+    staff = [staff_member['name'] for staff_member in data['staffData']]
+    
+    preferences = {staff_member['name']: {month:[] for month in months} for staff_member in data['staffData']}
+    
+    for person in data['staffData']:
+        for prefDayOff in person['preferences']:
+            date_obj = datetime.strptime(prefDayOff, '%Y-%m-%d')
+            preferences[person['name']][date_obj.month].append(date_obj.day)
+    
+    pprint(preferences)
+    '''duty_dates = assign_dates_by_month(staff, preferences, months, start_date, year)
+    duty_dates = duty_dates_to_month_dic(duty_dates, months)
+    write_to_excelsheet(duty_dates, months, year, filename)
+    os.startfile('%s.xlsx' % filename)
+'''
+'''
     preferences = {'Anya': {'8':[5, 12, 19, 26], '9':[], '10':[], '11':[]}, 
                    'Chris': {'8':[], '9':[], '10':[], '11':[]}, 
                    'Chelsea': {'8':[], '9':[], '10':[], '11':[]}, 
@@ -221,16 +242,15 @@ def start_schedule():
                    'Veronica': {'8':[], '9':[], '10':[6, 13, 20, 27], '11':[]},
                    'Juan': {'8':[], '9':[], '10':[], '11':[]}
                    }
-    
-    duty_dates = assign_dates_by_month(staff, preferences, months, start_date, year)
-    duty_dates = duty_dates_to_month_dic(duty_dates, months)
-    write_to_excelsheet(duty_dates, months, year, '2020 RA Duty')
-    os.startfile('2020 RA Duty.xlsx')
-
 #get_duty_dates_from_sheet('Pharez', '2020 RA Duty')
 #start_schedule()
+#I want to refactor my code and shy away from using ints and using dateimte objects.
+#This will improve readability
 
-'''
-I need to design a frontend, once thats done deploy!
+Add enddate
+Need to be able to schedule double duty.
+Check if no one can sit
 Add a param for staff types
 '''
+x = {'startDate': '2020-8-29', 'endDate': '2020-11-18', 'hall': 'Capen', 'staffData': [{'name': 'Pharez', 'preferences': ['2020-11-01', '2020-11-03']}, {'name': 'Katie', 'preferences': ['2020-11-09', '2020-11-16']}]}
+start_schedule(x)
