@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pprint import pprint
 
 app = Flask(__name__)
+app.config['EXCEL_FILES'] = "C:/Users/Varla/Documents/Programming/Projects/Duty Scheduler"
 CORS(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
@@ -88,7 +89,7 @@ def schedule_events():
 			app.apscheduler.add_job(func=send_text_notification, trigger='date', args=[str(number), msg_body], id=id_, run_date=run_date)
 		
 			print("Created a scheduled job for the number {} for the event {}".format(number, msg_body))
-	
+
 	if app.apscheduler.get_jobs():
 		print('Finished creating jobs')
 	
@@ -96,9 +97,8 @@ def schedule_events():
 
 @app.route('/schedule_duty',methods=['POST'])
 def schedule_duty():
-	print(json.loads(request.data))
-	start_schedule(json.loads(request.data))
-	return("Connection")
+	filename = start_schedule(json.loads(request.data))
+	return send_from_directory(app.config['EXCEL_FILES'], filename, as_attachment=True)
 
 @app.route('/add_duty_to_caledar')
 def add_duty_to_calendar():

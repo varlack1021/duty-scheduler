@@ -4,37 +4,14 @@ import time
 import calendar
 from openpyxl import load_workbook
 from datetime import datetime
-from collections import defaultdict
-from excel_calendar import create_excel_calendar
 from pprint import pprint
+from collections import defaultdict
+from excel_calendar import create_excel_calendar, write_to_excelsheet, get_duty_dates_from_sheet
 
-# are lists objects?
-# list of dates we do not  want to sit
-
-# need to pick dates, could do this randomly -Done
-# need to keep track of how many dates everyone has sat. -Done
-# This could be a text file
-# Output, a list of dates? -Done
-# Should we consider dates people
-# List of prefernces should switch to months
-# consider weekends equaility -
-# consider weekdays equality
-# The way this is done needs to be fixed
-# SRAS sit two weekendss a month
-# Check if the SRA was already scheduled for the week, I can check 
-# Improvements? Well what does it currently do? It currently has days we can't sit, evens out days
-# Does not remember previous number of days. Can it be stored in a cookie?
-# Add support for double duty weekend
-'''
-Issues
-Program wont work if everyone decides not to sit on one day.
-Does not have SRA sit on one day
-name casing
-google refresh tokens
-'''
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
 
+# ---------Algorithm functions--------------------
 def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
     current_RA_index = None
 
@@ -72,6 +49,28 @@ def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
 
     return RA
 
+def assign_dates_by_month(staff, preferences, months, start_date, year):
+    duty_dates = defaultdict(dict)
+    day_types = ['weekdays', 'weekends']
+    
+    for month in months:
+        weekdays, weekends = create_calendar(year, month, start_date)
+        duty_dates = add_month_to_duty_dates(duty_dates, staff, month)
+        #print(weekdays, weekends)
+
+        for day in weekdays:
+            RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekdays')
+            duty_dates[RA][month].append(day)
+            duty_dates[RA]['weekdays'] += 1
+
+        for day in weekends:
+            RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekends')
+            duty_dates[RA][month].append(day)
+            duty_dates[RA]['weekends'] += 1
+
+    #print_duty_dates(duty_dates)
+    return duty_dates
+
 def create_calendar(year, month_int, start_date):
     c = calendar.TextCalendar(calendar.SUNDAY)
     weekdays = []
@@ -87,6 +86,37 @@ def create_calendar(year, month_int, start_date):
 
     return weekdays, weekends
 
+def add_month_to_duty_dates(duty_dates, staff, month):
+    for ra in staff:
+        duty_dates[ra][month] = []
+        if 'weekdays' not in duty_dates[ra]:
+            duty_dates[ra]['weekdays'] = 0
+            duty_dates[ra]['weekends'] = 0
+
+    return duty_dates
+
+def convert_excel_date(duty_dates):
+    for month, excel_day in duty_dates.items():
+        days = [xlrd.xldate_as_tuple(day, 0)[2] for day in excel_day]
+        duty_dates[month] = days
+    #print(duty_dates)
+    return duty_dates
+
+#----- Sorts duty dates by month -----
+def decompose_duty_dates(duty_dates, months):
+    duty_dates_by_month = defaultdict(dict)
+    total_duty_dates = defaultdict(dict)
+    for month in months:
+        for name in duty_dates:
+            for day in duty_dates[name][month]:
+                duty_dates_by_month[month][day] = name
+            
+            del duty_dates[name][month]
+            total_duty_dates[name] = duty_dates[name]
+    
+    return duty_dates_by_month, total_duty_dates
+
+#----- Print Duty Dates---------------
 def print_duty_dates(duty_dates):
     value_iterator = iter(duty_dates)
     first_key = next(value_iterator)
@@ -107,133 +137,40 @@ def print_total_duty_days(duty_dates):
         print('''{} has {} days of weekdays duty and {} days of weekends duty.'''
             .format(RA, duty_dates[RA]['weekdays'], duty_dates[RA]['weekends']))
 
-def assign_dates_by_month(staff, preferences, months, start_date, year):
-    duty_dates = defaultdict(dict)
-    day_types = ['weekdays', 'weekends']
-    
-    for month in months:
-        weekdays, weekends = create_calendar(year, month, start_date)
-        duty_dates = add_month_to_duty_dates(duty_dates, staff, month)
-        print(weekdays, weekends)
-
-        for day in weekdays:
-            RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekdays')
-            duty_dates[RA][month].append(day)
-            duty_dates[RA]['weekdays'] += 1
-
-        for day in weekends:
-            RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekends')
-            duty_dates[RA][month].append(day)
-            duty_dates[RA]['weekends'] += 1
-
-    print_duty_dates(duty_dates)
-    return duty_dates
-
-def add_month_to_duty_dates(duty_dates, staff, month):
-    for ra in staff:
-        duty_dates[ra][month] = []
-        if 'weekdays' not in duty_dates[ra]:
-            duty_dates[ra]['weekdays'] = 0
-            duty_dates[ra]['weekends'] = 0
-
-    return duty_dates
-
-def duty_dates_to_month_dic(duty_dates, months):
-    duty_dates_by_month = defaultdict(dict)
-    for month in months:
-        for name in duty_dates:
-            for day in duty_dates[name][month]:
-                duty_dates_by_month[month][day] = name
-    
-    return duty_dates_by_month
-
-def write_to_excelsheet(duty_dates, months, year, filename):
-    '''
-    The algorithm iterates through the cells in the excel sheet that have a date.
-    The algo checks if the date is inlcuded in scheduled duty dates
-    '''
-    create_excel_calendar(year, filename)
-    loc = '%s.xlsx' % (filename)
-    #wb = xlrd.open_workbook(loc)
-
-    write_wb = load_workbook(loc)
-    read_wb = xlrd.open_workbook(loc)
-
-    for month_number in months:
-        datetime_object = datetime.strptime(str(month_number), "%m")
-        month_name = datetime_object.strftime('%B')
-        write_sheet = write_wb[month_name]
-        read_sheet = read_wb.sheet_by_name(month_name)
-
-        for row in range(2, write_sheet.max_row, 2):
-            
-            for col in range(write_sheet.max_column):
-                day = read_sheet.cell_value(row, col)
-                if day in duty_dates[month_number].keys() and day:
-                    row_num = row + 1
-                    name = duty_dates[month_number][day]
-                    cell = write_sheet.cell(row_num + 1, col + 1)
-                    cell.value = name
-
-        write_wb.save(loc)
-
-def get_duty_dates_from_sheet(name, filename):
-    filename = '%s.xlsx' % (filename)
-    duty_dates = {}
-    wb = xlrd.open_workbook(filename)
-    
-    for sheet in wb.sheets():
-
-        if any(sheet.row_values(5)):
-            month_number = list(calendar.month_name).index(sheet.name)
-            duty_dates[month_number] = []
-            
-            for row in range(2, sheet.nrows):
-
-                row_values = sheet.row_values(row)
-                if name in row_values:
-                    columns = [i for i, x in enumerate(row_values) if x == name]
-                    days = [sheet.cell(row-1, x).value for x in columns]
-                    duty_dates[month_number].extend(days)
-    
-    if duty_dates[list(duty_dates.keys())[0]][0] > 31:        
-        duty_dates = convert_excel_date(duty_dates)
-
-    return duty_dates
-
-def convert_excel_date(duty_dates):
-    for month, excel_day in duty_dates.items():
-        print(duty_dates)
-        days = [xlrd.xldate_as_tuple(day, 0)[2] for day in excel_day]
-        duty_dates[month] = days
-    print(duty_dates)
-    return duty_dates
-
-def start_schedule(data):
-    start_date = datetime.strptime(data['startDate'], '%Y-%m-%d')
-    end_date = datetime.strptime(data['endDate'], '%Y-%m-%d')
+#---- Main function ----
+def start_schedule(payload):
+    start_date = datetime.strptime(payload['startDate'], '%Y-%m-%d')
+    end_date = datetime.strptime(payload['endDate'], '%Y-%m-%d')
 
     months = [x for x in range(start_date.month, end_date.month + 1)]
     year =  start_date.year
     start_date = [start_date.month, start_date.day]
     
-    filename = '{} {} RA Duty'.format(year, data['hall'])
+    filename = '2020 {} Duty'.format(payload['hall'])
 
-    staff = [staff_member['name'] for staff_member in data['staffData']]
+    #cleanup
+    cleanup = True
+    if cleanup:
+        if os.path.exists(filename + ".xlsx"):
+            os.remove(filename + ".xlsx")
+
+    staff = [staff_member['name'] for staff_member in payload['staffData']]
     
-    preferences = {staff_member['name']: {month:[] for month in months} for staff_member in data['staffData']}
-    
-    for person in data['staffData']:
+    preferences = {staff_member['name']: {str(month):[] for month in months} for staff_member in payload['staffData']}
+
+    for person in payload['staffData']:
         for prefDayOff in person['preferences']:
-            date_obj = datetime.strptime(prefDayOff, '%Y-%m-%d')
-            preferences[person['name']][date_obj.month].append(date_obj.day)
+            if prefDayOff:
+                date_obj = datetime.strptime(prefDayOff, '%Y-%m-%d')
+                preferences[person['name']][str(date_obj.month)].append(date_obj.day)
+
+    duty_dates = assign_dates_by_month(staff, preferences, months, start_date, year)
+    duty_dates, total_days = decompose_duty_dates(duty_dates, months)
     
-    pprint(preferences)
-    '''duty_dates = assign_dates_by_month(staff, preferences, months, start_date, year)
-    duty_dates = duty_dates_to_month_dic(duty_dates, months)
-    write_to_excelsheet(duty_dates, months, year, filename)
-    os.startfile('%s.xlsx' % filename)
-'''
+    write_to_excelsheet(duty_dates, total_days, months, year, filename)
+    #os.startfile('%s.xlsx' % filename)
+    return ('%s.xlsx' % filename)
+
 '''
     preferences = {'Anya': {'8':[5, 12, 19, 26], '9':[], '10':[], '11':[]}, 
                    'Chris': {'8':[], '9':[], '10':[], '11':[]}, 
@@ -246,11 +183,10 @@ def start_schedule(data):
 #start_schedule()
 #I want to refactor my code and shy away from using ints and using dateimte objects.
 #This will improve readability
-
 Add enddate
 Need to be able to schedule double duty.
 Check if no one can sit
 Add a param for staff types
 '''
-x = {'startDate': '2020-8-29', 'endDate': '2020-11-18', 'hall': 'Capen', 'staffData': [{'name': 'Pharez', 'preferences': ['2020-11-01', '2020-11-03']}, {'name': 'Katie', 'preferences': ['2020-11-09', '2020-11-16']}]}
-start_schedule(x)
+#x = {'startDate': '2020-8-29', 'endDate': '2020-11-18', 'hall': 'Capen', 'staffpayload': [{'name': 'Pharez', 'preferences': ['2020-11-01', '2020-11-03']}, {'name': 'Katie', 'preferences': ['2020-11-09', '2020-11-16']}]}
+#start_schedule(x)
