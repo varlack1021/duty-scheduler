@@ -1,5 +1,4 @@
 import React, { Fragment, useState } from "react";
-import DatePicker from "react-datepicker";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
@@ -26,23 +25,31 @@ function App() {
 
   const sendFormData = async (formEvent) => {
     formEvent.preventDefault();
-
-    formData.staffData = staffData;
     console.log(formData);
-
+    formData.staffData = staffData;
     const requestOptions = {
       method: "POST",
       'Content-Type': 'application/json',
       body: JSON.stringify(formData),
+      responseType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     };
 
     let response = await fetch(
       "http://localhost:8000/schedule_duty",
       requestOptions
     );
-
+    let data = response.body;
+    
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(await response.blob());
+    
+    link.download = "Duty Calendar";
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     //setFormData({ video_link: "" });
-  
+    
   };
 
   function appendStaffMember(index, input) {
@@ -61,7 +68,6 @@ function App() {
   }
 
   function addDate(index) {
-    console.log(staffData, index.index);
     staffData[index.index].preferences.push(" ");
     setStaffData([...staffData]);
   }
@@ -146,7 +152,7 @@ function App() {
         </Button>
 
         <Button variant="secondary" onClick={addStaffMember}>
-          add staff member
+          Add staff member
         </Button>
       </Form>
     </Container>
