@@ -11,46 +11,54 @@ from excel_calendar import create_excel_calendar, write_to_excelsheet, get_duty_
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
 DOUBLE_DUTY = False
+NO_ASSIGNMENT = 'Unable to Assign'
 
 # ---------Algorithm functions--------------------
 def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
-    current_RA_index = None
+    no_asssignment_dic = preferences.pop(NO_ASSIGNMENT)
+    staff_names = list(preferences.keys())
 
-    RA = list(preferences.keys())[current_index[day_type]]
-    next_available_RA_index = current_index[day_type] + 1
+    current_RA_index = None
+    RA = staff_names[current_index[day_type]]
+    mod = len(preferences)
+
+    next_available_RA_index = (current_index[day_type] + 1) % mod
     current_RA_index = current_index[day_type]
     
     if current_index[day_type] == 0:
         total_days[day_type] += 1
 
     #-----------------Algorithm----------------------------------------
-    while (day in preferences[RA][str(month)]               or 
+    #This algo assigns an RA
+    while (day in preferences[RA][month]                    or 
            duty_dates[RA][day_type] >= total_days[day_type] or 
            day in duty_dates[RA][month]
            ):
 
-        if next_available_RA_index == len(preferences.keys()):
-            next_available_RA_index = 0
-
-        RA = list(preferences.keys())[next_available_RA_index]
+        RA = staff_names[next_available_RA_index]
         next_available_RA_index += 1
-
+        next_available_RA_index %= mod
+        
         # Handles edge case where we attempt to even out the days but can't since someone can't sit
         # a certain day
         if next_available_RA_index == current_RA_index:
-            while day in preferences[RA]:
-                if next_available_RA_index == len(preferences.keys()):
-                    next_available_RA_index = 0   
-                
-                RA = list(preferences.keys())[next_available_RA_index]
+            starting_RA_index = next_available_RA_index
+            while day in preferences[RA][month]:
+                RA = staff_names[next_available_RA_index]
                 next_available_RA_index += 1
-            
+                next_available_RA_index %= mod
+
+                #this control handles edge where no one can sit a day
+                if next_available_RA_index == starting_RA_index:
+                    RA = NO_ASSIGNMENT
+                    break 
             break
 
     current_index[day_type] += 1
     if current_index[day_type] == len(preferences):
         current_index[day_type] = 0
 
+    preferences[NO_ASSIGNMENT] = no_asssignment_dic
     return RA
 
 def assign_dates_by_month(staff, preferences, months, start_date, end_date, year):
@@ -79,11 +87,12 @@ def assign_dates_by_month(staff, preferences, months, start_date, end_date, year
     #print_duty_dates(duty_dates)
     return duty_dates
 
-def create_calendar(year, month_int, start_date, end_date):
+def create_calendar(year, month, start_date, end_date):
     c = calendar.TextCalendar(calendar.SUNDAY)
     weekdays = []
     weekends = []
-    
+    month_int = int(month)
+
     for day in c.itermonthdays2(year, month_int):
         
         if [month_int, day[0]] == end_date:
@@ -155,12 +164,15 @@ def start_schedule(payload):
     start_date = datetime.strptime(payload['startDate'], '%Y-%m-%d')
     end_date = datetime.strptime(payload['endDate'], '%Y-%m-%d')
 
-    months = [x for x in range(start_date.month, end_date.month + 1)]
+    months = [str(x) for x in range(start_date.month, end_date.month + 1)]
     year =  start_date.year
     start_date = [start_date.month, start_date.day]
     end_date = [end_date.month, end_date.day + 1]
     filename = '2020 {} Duty'.format(payload['hall'])
     
+    no_asssignment = {'name': NO_ASSIGNMENT, 'preferences': []}
+    payload['staffData'].append(no_asssignment)  
+
     global DOUBLE_DUTY
     DOUBLE_DUTY = payload['doubleDuty']
 
@@ -171,7 +183,7 @@ def start_schedule(payload):
 
     staff = [staff_member['name'] for staff_member in payload['staffData']]
     
-    preferences = {staff_member['name']: {str(month):[] for month in months} for staff_member in payload['staffData']}
+    preferences = {staff_member['name']: {month:[] for month in months} for staff_member in payload['staffData']}
 
     for person in payload['staffData']:
         for prefDayOff in person['preferences']:
@@ -182,7 +194,7 @@ def start_schedule(payload):
     duty_dates = assign_dates_by_month(staff, preferences, months, start_date, end_date, year)
     duty_dates, total_days = decompose_duty_dates(duty_dates, months)
     write_to_excelsheet(duty_dates, total_days, months, year, filename)
-    #os.startfile('%s.xlsx' % filename)
+    os.startfile('%s.xlsx' % filename)
     return ('%s.xlsx' % filename)
 
 '''

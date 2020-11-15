@@ -2,6 +2,7 @@ import xlrd
 import calendar
 import xlsxwriter
 from datetime import datetime
+from openpyxl.styles import Font
 from openpyxl import load_workbook
 
 #list of cell fill in colors for different months
@@ -116,7 +117,7 @@ def write_to_excelsheet(duty_dates, total_days, months, year, filename):
     read_wb = xlrd.open_workbook(loc)
 
     for month_number in months:
-        datetime_object = datetime.strptime(str(month_number), "%m")
+        datetime_object = datetime.strptime(month_number, "%m")
         month_name = datetime_object.strftime('%B')
         write_sheet = write_wb[month_name]
         read_sheet = read_wb.sheet_by_name(month_name)
@@ -129,6 +130,9 @@ def write_to_excelsheet(duty_dates, total_days, months, year, filename):
                     name = duty_dates[month_number][day]
                     cell = write_sheet.cell(row_num + 1, col + 1)
                     cell.value = name
+
+                    if cell.value == 'Unable to Assign':
+                    	cell.font = Font(color='eb0c0c')
 
     # Add total duty days sat per person sheet
     write_sheet = write_wb['Total Duty Days']
