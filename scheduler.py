@@ -49,14 +49,15 @@ def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
 
     return RA
 
-def assign_dates_by_month(staff, preferences, months, start_date, year):
+def assign_dates_by_month(staff, preferences, months, start_date, end_date, year):
     duty_dates = defaultdict(dict)
     day_types = ['weekdays', 'weekends']
     
     for month in months:
-        weekdays, weekends = create_calendar(year, month, start_date)
+        weekdays, weekends = create_calendar(year, month, start_date, end_date)
         duty_dates = add_month_to_duty_dates(duty_dates, staff, month)
         #print(weekdays, weekends)
+
 
         for day in weekdays:
             RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekdays')
@@ -71,12 +72,16 @@ def assign_dates_by_month(staff, preferences, months, start_date, year):
     #print_duty_dates(duty_dates)
     return duty_dates
 
-def create_calendar(year, month_int, start_date):
+def create_calendar(year, month_int, start_date, end_date):
     c = calendar.TextCalendar(calendar.SUNDAY)
     weekdays = []
     weekends = []
     
     for day in c.itermonthdays2(year, month_int):
+        
+        if [month_int, day[0]] == end_date:
+            break
+        
         if day[0] != 0:
             if month_int != start_date[0] or day[0] >= start_date[1]:
                 if day[1] in [5, 6]:
@@ -145,7 +150,7 @@ def start_schedule(payload):
     months = [x for x in range(start_date.month, end_date.month + 1)]
     year =  start_date.year
     start_date = [start_date.month, start_date.day]
-    
+    end_date = [end_date.month, end_date.day + 1]
     filename = '2020 {} Duty'.format(payload['hall'])
 
     #cleanup
@@ -164,7 +169,7 @@ def start_schedule(payload):
                 date_obj = datetime.strptime(prefDayOff, '%Y-%m-%d')
                 preferences[person['name']][str(date_obj.month)].append(date_obj.day)
 
-    duty_dates = assign_dates_by_month(staff, preferences, months, start_date, year)
+    duty_dates = assign_dates_by_month(staff, preferences, months, start_date, end_date, year)
     duty_dates, total_days = decompose_duty_dates(duty_dates, months)
     
     write_to_excelsheet(duty_dates, total_days, months, year, filename)
