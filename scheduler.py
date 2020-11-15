@@ -10,6 +10,7 @@ from excel_calendar import create_excel_calendar, write_to_excelsheet, get_duty_
 
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
+DOUBLE_DUTY = False
 
 # ---------Algorithm functions--------------------
 def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
@@ -23,7 +24,10 @@ def assign_ra_to_day(day, month, preferences, duty_dates, day_type):
         total_days[day_type] += 1
 
     #-----------------Algorithm----------------------------------------
-    while day in preferences[RA][str(month)] or duty_dates[RA][day_type] >= total_days[day_type]:
+    while (day in preferences[RA][str(month)]               or 
+           duty_dates[RA][day_type] >= total_days[day_type] or 
+           day in duty_dates[RA][month]
+           ):
 
         if next_available_RA_index == len(preferences.keys()):
             next_available_RA_index = 0
@@ -56,8 +60,6 @@ def assign_dates_by_month(staff, preferences, months, start_date, end_date, year
     for month in months:
         weekdays, weekends = create_calendar(year, month, start_date, end_date)
         duty_dates = add_month_to_duty_dates(duty_dates, staff, month)
-        #print(weekdays, weekends)
-
 
         for day in weekdays:
             RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekdays')
@@ -68,6 +70,11 @@ def assign_dates_by_month(staff, preferences, months, start_date, end_date, year
             RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekends')
             duty_dates[RA][month].append(day)
             duty_dates[RA]['weekends'] += 1
+
+            if DOUBLE_DUTY:
+                RA = assign_ra_to_day(day, month, preferences, duty_dates, 'weekends')
+                duty_dates[RA][month].append(day)
+                duty_dates[RA]['weekends'] += 1
 
     #print_duty_dates(duty_dates)
     return duty_dates
@@ -84,7 +91,7 @@ def create_calendar(year, month_int, start_date, end_date):
         
         if day[0] != 0:
             if month_int != start_date[0] or day[0] >= start_date[1]:
-                if day[1] in [5, 6]:
+                if day[1] in [4, 5]:
                     weekends.append(day[0])
                 else:
                     weekdays.append(day[0])
@@ -104,7 +111,6 @@ def convert_excel_date(duty_dates):
     for month, excel_day in duty_dates.items():
         days = [xlrd.xldate_as_tuple(day, 0)[2] for day in excel_day]
         duty_dates[month] = days
-    #print(duty_dates)
     return duty_dates
 
 #----- Sorts duty dates by month -----
@@ -114,11 +120,13 @@ def decompose_duty_dates(duty_dates, months):
     for month in months:
         for name in duty_dates:
             for day in duty_dates[name][month]:
-                duty_dates_by_month[month][day] = name
-            
+                if day in duty_dates_by_month[month]:
+                    duty_dates_by_month[month][day] += " and %s" %(name)
+                else:
+                    duty_dates_by_month[month][day] = name
+                                
             del duty_dates[name][month]
             total_duty_dates[name] = duty_dates[name]
-    
     return duty_dates_by_month, total_duty_dates
 
 #----- Print Duty Dates---------------
@@ -152,8 +160,10 @@ def start_schedule(payload):
     start_date = [start_date.month, start_date.day]
     end_date = [end_date.month, end_date.day + 1]
     filename = '2020 {} Duty'.format(payload['hall'])
+    
+    global DOUBLE_DUTY
+    DOUBLE_DUTY = payload['doubleDuty']
 
-    #cleanup
     cleanup = True
     if cleanup:
         if os.path.exists(filename + ".xlsx"):
@@ -171,7 +181,6 @@ def start_schedule(payload):
 
     duty_dates = assign_dates_by_month(staff, preferences, months, start_date, end_date, year)
     duty_dates, total_days = decompose_duty_dates(duty_dates, months)
-    
     write_to_excelsheet(duty_dates, total_days, months, year, filename)
     #os.startfile('%s.xlsx' % filename)
     return ('%s.xlsx' % filename)
