@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 import Container from "react-bootstrap/Container";
 import AppendForm from "./appendForm";
 import Card from "react-bootstrap/Card";
@@ -29,9 +30,10 @@ function App() {
     formData.staffData = staffData;
     const requestOptions = {
       method: "POST",
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       body: JSON.stringify(formData),
-      responseType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      responseType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     };
 
     let response = await fetch(
@@ -39,125 +41,176 @@ function App() {
       requestOptions
     );
     let data = response.body;
-    
-    const link = document.createElement('a');
+
+    //Download Excel File from website
+    const link = document.createElement("a");
     const url = URL.createObjectURL(await response.blob());
-    
+
     link.download = "Duty Calendar";
     link.href = url;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    //setFormData({ video_link: "" });
-    
   };
 
-  function appendStaffMember(index, input) {
-    staffData[index].name = input;
-    setStaffData(staffData);
-  }
-
+  //For Some reason I have to use funcs to increase the size of my states
+  //If I directly call the functions React crashes with error too many re renders
   function addStaffMember() {
     let data = { name: "", preferences: [""] };
     setStaffData([...staffData, data]);
   }
 
-  function appendDates(index, index2, input) {
-    staffData[index].preferences[index2] = input;
-    setStaffData(staffData);
-  }
-
   function addDate(index) {
-    staffData[index.index].preferences.push(" ");
+    console.log(staffData);
+    staffData[index.index].preferences.push("");
     setStaffData([...staffData]);
   }
 
+  function removeStaffMember(index) {
+    staffData.splice(index.index, 1);
+    setStaffData([...staffData]);
+  }
   return (
-
-   <div className ="App-background">
-    <Container className="App">
-      <Form className="mt-5" onSubmit={(formEvent) => sendFormData(formEvent)}>
-        <Form.Label>Duty Scheduling Options</Form.Label>
-        <Form.Row>
-          <Form.Group>
-            <Form.Label>Start Date</Form.Label>
-            <Form.Control
-              type="date"
-              onChange={(inputEvent) =>
-                setFormData({ ...formData, startDate: inputEvent.target.value })
-              }
-            ></Form.Control>
-          </Form.Group>
-
-          <Form.Group>
-            <Col xs={"auto"}>
-              <Form.Label>End Date</Form.Label>
+    <div className="App-background">
+      <Container className="App">
+        <Form
+          className="mt-5"
+          onSubmit={(formEvent) => sendFormData(formEvent)}
+        >
+          <Form.Label>Duty Scheduling Options</Form.Label>
+          <Form.Row>
+            <Form.Group>
+              <Form.Label>Start Date</Form.Label>
               <Form.Control
                 type="date"
+                required="True"
                 onChange={(inputEvent) =>
-                  setFormData({ ...formData, endDate: inputEvent.target.value })
+                  setFormData({
+                    ...formData,
+                    startDate: inputEvent.target.value,
+                  })
                 }
               ></Form.Control>
-            </Col>
-          </Form.Group>
-        </Form.Row>
-        <Form.Group className="input-box">
-          <Form.Control
-            type="text"
-            placeholder="Enter Hall Name"
-            onChange={(inputEvent) =>
-              setFormData({ ...formData, hall: inputEvent.target.value })
-            }
-          />
-        </Form.Group>
-        {staffData.map((data, index) => (
-          <React.Fragment>
-            <Form.Group key={index} className="input-box">
-              <Form.Label> Name </Form.Label>
+            </Form.Group>
+
+            <Form.Group>
+              <Col xs={"auto"}>
+                <Form.Label>End Date</Form.Label>
+                <Form.Control
+                  required="True"
+                  type="date"
+                  onChange={(inputEvent) =>
+                    setFormData({
+                      ...formData,
+                      endDate: inputEvent.target.value,
+                    })
+                  }
+                ></Form.Control>
+              </Col>
+            </Form.Group>
+          </Form.Row>
+          <Form.Row>
+            <Form.Group className="input-box">
               <Form.Control
                 type="text"
-                placeholder="Enter staff member name"
+                placeholder="Enter Hall Name"
                 onChange={(inputEvent) =>
-                  appendStaffMember(index, inputEvent.target.value)
+                  setFormData({ ...formData, hall: inputEvent.target.value })
                 }
+                value={formData.hall}
               />
             </Form.Group>
-            <Form.Label>Days Cannot Sit</Form.Label>
-            <Form.Row>
-              {staffData[index].preferences.map((input, index2) => (
-                <React.Fragment>
-                  <Col xs="auto">
-                    <Form.Group key={index}>
-                      <Form.Control
-                        type="date"
-                        onChange={(inputEvent) =>
-                          appendDates(index, index2, inputEvent.target.value)
-                        }
-                      />
-                    </Form.Group>
-                  </Col>
-                </React.Fragment>
-              ))}
-              <Col>
-                <Button variant="secondary" onClick={() => addDate({ index })}>
-                  Add date
-                </Button>
-              </Col>
-            </Form.Row>
-          </React.Fragment>
-        ))}
+          </Form.Row>
+          {staffData.map((data, index) => (
+            <React.Fragment>
+              <Form.Group key={index} className="input-box">
+                <Form.Label> Name </Form.Label>
 
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
+                <Form.Control
+                  type="text"
+                  required="True"
+                  placeholder="Enter staff member name"
+                  onChange={(inputEvent) =>
+                    setStaffData(
+                      staffData.map((item, index2) =>
+                        index === index2
+                          ? {
+                              ...staffData[index],
+                              name: inputEvent.target.value,
+                            }
+                          : item
+                      )
+                    )
+                  }
+                  value={staffData[index].name}
+                />
+              </Form.Group>
 
-        <Button variant="secondary" onClick={addStaffMember}>
-          Add staff member
-        </Button>
-      </Form>
-    </Container>
+              <Form.Label>Days Cannot Sit</Form.Label>
+              <Form.Row>
+                {staffData[index].preferences.map((input, index2) => (
+                  <React.Fragment>
+                    <Col xs="auto">
+                      <Form.Group key={index}>
+                        <Form.Control
+                          type="date"
+                          onChange={(inputEvent) =>
+                            setStaffData(
+                              staffData.map((item, index3) =>
+                                index === index3
+                                  ? {
+                                      ...staffData[index],
+                                      preferences: item.preferences.map((item2, index4) =>
+                                          index2 === index4 ? inputEvent.target.value : item2
+                                      )
+                                    }
+                                  : item
+                              )
+                            )
+                          }
+                          value = {staffData[index].preferences[index2]}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </React.Fragment>
+                ))}
+                <Col>
+                  <Button
+                    variant="secondary"
+                    onClick={() => addDate({ index })}
+                  >
+                    Add date
+                  </Button>
+                </Col>
+              </Form.Row>
+              <Form.Row>
+                <Col>
+                  <Button
+                    variant="danger"
+                    onClick={() => removeStaffMember({ index })}
+                  >
+                    Remove Staff Member
+                  </Button>
+                </Col>
+              </Form.Row>
+            </React.Fragment>
+          ))}
+
+          <Form.Row className="submit-row">
+            <Col>
+              <Button variant="primary" type="submit">
+                Submit
+              </Button>
+            </Col>
+            <Col>
+              <Button variant="secondary" onClick={addStaffMember}>
+                Add staff member
+              </Button>
+            </Col>
+          </Form.Row>
+        </Form>
+      </Container>
     </div>
-    
   );
 }
 

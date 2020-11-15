@@ -5,7 +5,7 @@
   align-items: center;
   font-size: calc(10px + 2vmin);
   color: white;
-  height: 150vh;
+  height: 350vh;
 
 }
 
@@ -16,7 +16,7 @@ body {
 #bg-right {
   background-color: yellow;
   position: fixed;
-  top: 0;
+  top: 10;
   bottom: 0;
   left: 50%;
   right: 0;
@@ -47,6 +47,11 @@ body {
   color: white;
 }
 
+.submit-row {
+  align-items: center;
+   justify-content: center;
+   line-height: 95px;
+}
 .App-link {
   color: #61dafb;
 }
