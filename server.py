@@ -7,7 +7,7 @@ from flask import Flask, request, make_response, redirect, url_for, send_from_di
 
 from duty_sms_notifications import send_text_notification
 from google_auth import get_event_dates, get_auth_url, callback, add_events
-from scheduler import start_schedule, get_duty_dates_from_sheet
+from scheduler import Scheduler
 
 from datetime import datetime, timedelta
 from pprint import pprint
@@ -18,14 +18,6 @@ CORS(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
-
-@app.route('/download')
-def download():
-	return send_file('C:/Users/Varla/Documents/Programming/Tools/hadoop/wikiHadoop.txt', 'wikiHadoop.txt')
-	
-@app.route('/')
-def home():
-	return 'Connection'
 
 @app.route('/help')
 def helpfunc():
@@ -97,8 +89,9 @@ def schedule_events():
 
 @app.route('/schedule_duty',methods=['POST'])
 def schedule_duty():
-	filename = start_schedule(json.loads(request.data))
-	return send_from_directory(app.config['EXCEL_FILES'], filename, as_attachment=True)
+	scheduler = Scheduler(json.loads(request.data))
+	scheduler.start_schedule()
+	return send_from_directory(app.config['EXCEL_FILES'], scheduler.filename + ".xlsx", as_attachment=True)
 
 @app.route('/add_duty_to_caledar')
 def add_duty_to_calendar():
