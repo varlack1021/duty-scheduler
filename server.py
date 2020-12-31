@@ -12,18 +12,16 @@ from scheduler import Scheduler
 from datetime import datetime, timedelta
 from pprint import pprint
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./my-app/build', static_url_path='/')
 app.config['EXCEL_FILES'] = "C:/Users/Varla/Documents/Programming/Projects/Duty Scheduler"
 CORS(app)
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
-@app.route('/help')
+@app.route('/')
 def helpfunc():
-	#print(app.apscheduler.get_job(id='localhost'))
-	#help(app.apscheduler)
-	return 'Connected'
+	return app.send_static_file('index.html')
 
 @app.route('/delete_cookies')
 def delete_cookies():
