@@ -1,13 +1,10 @@
-import React, { Fragment, useState } from "react";
+import React, {useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 import Container from "react-bootstrap/Container";
-import Card from "react-bootstrap/Card";
-import Dropdown from "react-bootstrap/Dropdown";
 
 function App() {
   let [formData, setFormData] = useState({
@@ -41,7 +38,6 @@ function App() {
       "http://localhost:8000/schedule_duty",
       requestOptions
     );
-    let data = response.body;
 
     //Download Excel File from website
     const link = document.createElement("a");
