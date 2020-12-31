@@ -4,7 +4,12 @@ credentials.json
 *.png
 *.txt
 token.pickle
+
 microsoft_graph.py
+test.py
+backgroundProcesess.py
+duty_sms_notifications.py
+google_auth.py
 
 appendForm.js
 logo.svg
