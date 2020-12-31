@@ -6,7 +6,6 @@ import Form from "react-bootstrap/Form";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import Container from "react-bootstrap/Container";
-import AppendForm from "./appendForm";
 import Card from "react-bootstrap/Card";
 import Dropdown from "react-bootstrap/Dropdown";
 
@@ -15,12 +14,14 @@ function App() {
     hall: "",
     startDate: "",
     endDate: "",
+    doubleDuty: false,
   });
 
   let [staffData, setStaffData] = useState([
     {
       name: "",
       preferences: [""],
+      SRA: false,
     },
   ]);
 
@@ -61,7 +62,7 @@ function App() {
   }
 
   function addDate(index) {
-    console.log(staffData);
+    console.log(formData);
     staffData[index.index].preferences.push("");
     setStaffData([...staffData]);
   }
@@ -70,14 +71,19 @@ function App() {
     staffData.splice(index.index, 1);
     setStaffData([...staffData]);
   }
+
   return (
-    <div className="App-background">
-      <Container className="App">
-        <Form
-          className="mt-5"
-          onSubmit={(formEvent) => sendFormData(formEvent)}
-        >
-          <Form.Label>Duty Scheduling Options</Form.Label>
+    <div className="App">
+      <p className="Seperation">
+        This text is to have a component between the first component I want
+        padding and the top
+      </p>
+      <h1 className="App-header"> Residence Life Auto Duty Scheduler </h1>
+      <Container className="Form-Format">
+        <Form onSubmit={(formEvent) => sendFormData(formEvent)}>
+          <Form.Label className="Scheduling-options" style={{marginBottom: '20px'}}>
+            Duty Scheduling Options
+          </Form.Label>
           <Form.Row>
             <Form.Group>
               <Form.Label>Start Date</Form.Label>
@@ -120,32 +126,71 @@ function App() {
                 value={formData.hall}
               />
             </Form.Group>
+            <Form.Group>
+              <Col xs={"auto"}>
+                <Form.Check
+                  type="checkBox"
+                  label="Weekend Double Duty"
+                  className="doubleDuty-checkBox"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      doubleDuty: !formData.doubleDuty,
+                    })
+                  }
+                />
+              </Col>
+            </Form.Group>
           </Form.Row>
+          <Form.Label className="Staff-members" style={{marginBottom: '15px'}}>Staff Members </Form.Label>
+
           {staffData.map((data, index) => (
             <React.Fragment>
-              <Form.Group key={index} className="input-box">
-                <Form.Label> Name </Form.Label>
+              <Form.Row>
+                <Form.Group key={index} className="input-box">
+                  <Form.Label> Name </Form.Label>
 
-                <Form.Control
-                  type="text"
-                  required="True"
-                  placeholder="Enter staff member name"
-                  onChange={(inputEvent) =>
-                    setStaffData(
-                      staffData.map((item, index2) =>
-                        index === index2
-                          ? {
-                              ...staffData[index],
-                              name: inputEvent.target.value,
-                            }
-                          : item
+                  <Form.Control
+                    type="text"
+                    required="True"
+                    placeholder="Enter staff member"
+                    onChange={(inputEvent) =>
+                      setStaffData(
+                        staffData.map((item, index2) =>
+                          index === index2
+                            ? {
+                                ...staffData[index],
+                                name: inputEvent.target.value,
+                              }
+                            : item
+                        )
                       )
-                    )
-                  }
-                  value={staffData[index].name}
-                />
-              </Form.Group>
-
+                    }
+                    value={staffData[index].name}
+                  />
+                </Form.Group>
+                <Form.Group className="sra-checkbox">
+                  <Col xs={"auto"}>
+                    <Form.Check
+                      type="checkBox"
+                      label="SRA"
+                      className="sra-checkBox"
+                      onClick={() =>
+                        setStaffData(
+                          staffData.map((item, index2) =>
+                            index === index2
+                              ? {
+                                  ...staffData[index],
+                                  SRA: true,
+                                }
+                              : item
+                          )
+                        )
+                      }
+                    />
+                  </Col>
+                </Form.Group>
+              </Form.Row>
               <Form.Label>Days Cannot Sit</Form.Label>
               <Form.Row>
                 {staffData[index].preferences.map((input, index2) => (
@@ -160,15 +205,18 @@ function App() {
                                 index === index3
                                   ? {
                                       ...staffData[index],
-                                      preferences: item.preferences.map((item2, index4) =>
-                                          index2 === index4 ? inputEvent.target.value : item2
-                                      )
+                                      preferences: item.preferences.map(
+                                        (item2, index4) =>
+                                          index2 === index4
+                                            ? inputEvent.target.value
+                                            : item2
+                                      ),
                                     }
                                   : item
                               )
                             )
                           }
-                          value = {staffData[index].preferences[index2]}
+                          value={staffData[index].preferences[index2]}
                         />
                       </Form.Group>
                     </Col>
@@ -177,6 +225,7 @@ function App() {
                 <Col>
                   <Button
                     variant="secondary"
+                    className="btn.btn-secondary"
                     onClick={() => addDate({ index })}
                   >
                     Add date
@@ -188,6 +237,7 @@ function App() {
                   <Button
                     variant="danger"
                     onClick={() => removeStaffMember({ index })}
+                    style = {{marginBottom: '35px'}}
                   >
                     Remove Staff Member
                   </Button>
@@ -197,19 +247,23 @@ function App() {
           ))}
 
           <Form.Row className="submit-row">
-            <Col>
+            <Form.Group>
               <Button variant="primary" type="submit">
                 Submit
               </Button>
-            </Col>
-            <Col>
-              <Button variant="secondary" onClick={addStaffMember}>
-                Add staff member
-              </Button>
-            </Col>
+            </Form.Group>
+            <Form.Group>
+              <Col>
+                <Button variant="secondary" onClick={addStaffMember}>
+                  Add staff member
+                </Button>
+              </Col>
+            </Form.Group>
           </Form.Row>
         </Form>
       </Container>
+
+      <footer className="Footer"> &copy; Pharez J. Varlack </footer>
     </div>
   );
 }

@@ -79,9 +79,7 @@ class Scheduler:
 
         return RA
 
-    def assign_dates_by_month(self):
-        day_types = ['weekdays', 'weekends']
-        
+    def assign_dates_by_month(self):        
         for month in self.months:
             weekdays, weekends = self.create_calendar(month)
             self.add_month_to_duty_dates(month)

@@ -1,63 +1,81 @@
 .App {
-  background-color: #432818;
   display: flex;
   flex-direction: column;
-  align-items: center;
   font-size: calc(10px + 2vmin);
-  color: white;
-  height: 350vh;
+  height: 65%;
+  background-image: linear-gradient(#0353a3, #b97446, #0353a3)
 
 }
 
-body {
-  background-color: lightblue;
-}
-
-#bg-right {
-  background-color: yellow;
-  position: fixed;
-  top: 10;
-  bottom: 0;
-  left: 50%;
-  right: 0;
-  z-index: -1;
-}
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-background {
-  background: #bb9457;
-  background-size: ;
-}
 .App-header {
-  background-color: #282c34;
-  display: flex;
-  flex-direction: column;
+  background-color: #2E4AAA;
+  padding: 20px;
+  text-align: center;
+  margin-left: 20px;
+  margin-right: 20px;
+  border-radius: 15px;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+  color: #ff944d;
+}
+
+.Seperation {
+  .opacity: 0%;
+  font-size: 1px;
+}
+
+.Form-Format {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  font-size: calc(10px + 2vmin);
   color: white;
+
+}
+.Scheduling-options {
+  text-decoration: underline;
+  margin-top: 25px;
+}
+
+.Staff-members {
+  margin-top: 50px;
+  text-decoration: underline;
+}
+
+.btn.btn-secondary {
+  background-color: #666666;
 }
 
 .submit-row {
-  align-items: center;
-   justify-content: center;
-   line-height: 95px;
+  line-height: 95px;
 }
-.App-link {
-  color: #61dafb;
+
+.doubleDuty-checkBox {
+  font-size: 15px;
+}
+
+.sra-checkbox {
+  font-size: 15px;
+  position:relative; 
+  top: 50px;
 }
 
 .input-box {
-  width: 350px;
+  width: 190px;
+}
+
+.Footer {
+  background-color: #2E4AAA;
+  border-radius: 15px;
+  margin-top: 75px;
+  margin-bottom: 10px;
+  padding-bottom: 15px;
+  text-align: center;
+  margin-left: 20px;
+  margin-right: 20px;
+  padding: 5px;
+  color: white;
 }
 
 @keyframes App-logo-spin {
