@@ -5,7 +5,6 @@ from flask_apscheduler import APScheduler
 from flask_cors import CORS 
 from flask import Flask, request, make_response, redirect, url_for, send_from_directory, send_file
 
-from duty_sms_notifications import send_text_notification
 from google_auth import get_event_dates, get_auth_url, callback, add_events
 from scheduler import Scheduler
 
