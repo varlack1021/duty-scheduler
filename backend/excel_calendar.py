@@ -10,18 +10,17 @@ from pathlib import Path
 month_styles = {1: '0099ff', 2: '66c2ff', 3: '8cd98c', 4: '339933', 5: '00802b', 6: 'ffdd99',
 				7: 'ffbb33', 8: 'ff9933', 9: 'e65c00', 10: 'cc0000', 11: '990000', 12: '0066cc'}
 
+EXCEL_FOLDER_PATH = 'backend/excel_files/'
 # Set the first day as Sunday
 
 class Excel_Calendar:
 	
 	def __init__(self, filename):
 		self.filename = filename + '.xlsx'
-		self.path = Path('excel_files/') / self.filename
-		print(self.path)
+		self.path = Path(EXCEL_FOLDER_PATH) / self.filename
 
 	def create_excel_calendar(self, year):
 		calendar.setfirstweekday(firstweekday=6)
-
 		workbook = xlsxwriter.Workbook(self.path)
 
 		# Traveling for 12 months

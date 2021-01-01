@@ -169,7 +169,7 @@ class Scheduler:
     #---- Main function ----
     def start_schedule(self):
 
-        cleanup = True
+        cleanup = False
         if cleanup:
             if os.path.exists(self.filename + ".xlsx"):
                 os.remove(self.filename + ".xlsx")
