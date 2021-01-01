@@ -21,6 +21,7 @@ scheduler.start()
 
 @app.route('/')
 def helpfunc():
+	return "Hello World"
 	return app.send_static_file('index.html')
 
 @app.route('/delete_cookies')
