@@ -9,12 +9,14 @@ from duty_sms_notifications import send_text_notification
 from google_auth import get_event_dates, get_auth_url, callback, add_events
 from scheduler import Scheduler
 
+from pathlib import Path
 from datetime import datetime, timedelta
 from pprint import pprint
 
 app = Flask(__name__, static_folder='./my-app/build', static_url_path='/')
-app.config['EXCEL_FILES'] = "C:/Users/Varla/Documents/Programming/Projects/Duty Scheduler"
+app.config['EXCEL_FILES'] = Path('excel_files')
 CORS(app)
+
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()

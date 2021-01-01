@@ -4,7 +4,7 @@ import calendar
 from datetime import datetime
 from pprint import pprint
 from collections import defaultdict
-from excel_calendar import create_excel_calendar, write_to_excelsheet, get_duty_dates_from_sheet
+from excel_calendar import Excel_Calendar
 
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
@@ -34,7 +34,7 @@ class Scheduler:
     # ---------Algorithm functions--------------------
     def assign_RD_to_block ():
         pass
-        
+
     def assign_ra_to_day(self, day, month, day_type):
         staff_names = list(self.preferences.keys())
         current_RA_index = None
@@ -176,7 +176,9 @@ class Scheduler:
         
         self.assign_dates_by_month()
         self.duty_dates, total_days = self.decompose_duty_dates()
-        write_to_excelsheet(self.duty_dates, total_days, self.months, self.year, self.filename)
+
+        excel_obj_tool = Excel_Calendar(self.filename)
+        excel_obj_tool.write_to_excelsheet(self.duty_dates, total_days, self.months, self.year)
         
         #os.startfile('%s.xlsx' % self.filename)
 
