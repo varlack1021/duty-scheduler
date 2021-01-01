@@ -4,7 +4,7 @@ import calendar
 from datetime import datetime
 from pprint import pprint
 from collections import defaultdict
-from excel_calendar import Excel_Calendar
+from backend.excel_calendar import Excel_Calendar
 
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}

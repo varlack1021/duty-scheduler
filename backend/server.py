@@ -5,8 +5,7 @@ from flask_apscheduler import APScheduler
 from flask_cors import CORS 
 from flask import Flask, request, make_response, redirect, url_for, send_from_directory, send_file
 
-from google_auth import get_event_dates, get_auth_url, callback, add_events
-from scheduler import Scheduler
+from backend.scheduler import Scheduler
 
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -31,7 +30,7 @@ def delete_cookies():
 		res.delete_cookie(key)
 	return res
 	
-
+'''
 @app.route('/googlecallback', methods=['GET'])						
 def googleCallBack():
 	auth_response = request.url
@@ -48,14 +47,14 @@ def googleCallBack():
 	res.headers['location'] = url_for('add_duty_to_calendar')
 
 	return res, 302
-
+'''
 @app.route('/check_cookies', methods=['GET'])
 def check_cookies():
 	if not request.cookies.get('token'):
 		return redirect(get_auth_url())
 
 	return redirect(url_for('add_duty_to_caledar'))
-
+'''
 @app.route('/schedule_events', methods=['GET'])
 def schedule_events():	
 	creds = request.cookies
@@ -85,20 +84,20 @@ def schedule_events():
 		print('Finished creating jobs')
 	
 	return 'Finished scheduling events'
-
+'''
 @app.route('/schedule_duty',methods=['POST'])
 def schedule_duty():
 	scheduler = Scheduler(json.loads(request.data))
 	scheduler.start_schedule()
 	return send_from_directory(app.config['EXCEL_FILES'], scheduler.filename + ".xlsx", as_attachment=True)
-
+'''
 @app.route('/add_duty_to_caledar')
 def add_duty_to_calendar():
 	duty_dates = get_duty_dates_from_sheet('Pharez', '2020 RA Duty')
 	creds = request.cookies
 	add_events(duty_dates, creds, 'Duty', 20, 0)
 	return 'Event Created '
-
+'''
 #not currently working
 def remove_event(event_date, number):
 	app.scheduler.remove_job(id=event_date+str(number))
