@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from pprint import pprint
 
-app = Flask(__name__, static_folder='./my-app/build', static_url_path='/')
+app = Flask(__name__, static_folder='../my-app/build', static_url_path='/')
 app.config['EXCEL_FILES'] = Path('excel_files')
 CORS(app)
 
@@ -21,7 +21,6 @@ scheduler.start()
 
 @app.route('/')
 def helpfunc():
-	return "Hello World"
 	return app.send_static_file('index.html')
 
 @app.route('/delete_cookies')
