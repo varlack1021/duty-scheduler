@@ -2,15 +2,15 @@ __pycache__/
 *.xlsx
 credentials.json
 *.png
-timeSpent.txt
-azure_creds.txt
-token.pickle
+*.txt
 
+token.pickle
 microsoft_graph.py
-test.py
-backgroundProcesess.py
+background_procesess.py
 duty_sms_notifications.py
 google_auth.py
+backend/credentials/
+backend/excel_files
 
 appendForm.js
 logo.svg
