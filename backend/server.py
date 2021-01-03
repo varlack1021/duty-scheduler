@@ -14,14 +14,14 @@ from pprint import pprint
 app = Flask(__name__, static_folder='../my-app/build', static_url_path='/')
 app.config['EXCEL_FILES'] = Path('excel_files')
 CORS(app)
-
+import os
 scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
 @app.route('/')
 def helpfunc():
-	return app.send_static_file('index.html')
+	return app.send_static_file("index.html")
 
 @app.route('/delete_cookies')
 def delete_cookies():

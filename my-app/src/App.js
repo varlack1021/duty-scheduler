@@ -35,7 +35,7 @@ function App() {
     };
 
     let response = await fetch(
-      "http://localhost:8000/schedule_duty",
+      "https://npautoscheduler.herokuapp.com/schedule_duty",
       requestOptions
     );
 
