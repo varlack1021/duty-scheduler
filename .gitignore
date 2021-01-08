@@ -9,8 +9,6 @@ microsoft_graph.py
 background_procesess.py
 duty_sms_notifications.py
 google_auth.py
-backend/credentials/
-backend/excel_files
 
 appendForm.js
 logo.svg
