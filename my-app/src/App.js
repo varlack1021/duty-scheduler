@@ -24,7 +24,6 @@ function App() {
 
   const sendFormData = async (formEvent) => {
     formEvent.preventDefault();
-    console.log(formData);
     formData.staffData = staffData;
     const requestOptions = {
       method: "POST",
@@ -35,7 +34,7 @@ function App() {
     };
 
     let response = await fetch(
-      "https://npautoscheduler.herokuapp.com/schedule_duty",
+      window.location.href + "schedule_duty",
       requestOptions
     );
 
@@ -43,7 +42,7 @@ function App() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(await response.blob());
 
-    link.download = "Duty Calendar";
+    link.download = formData.hall.concat(' ', 'Duty Calendar');
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -58,7 +57,6 @@ function App() {
   }
 
   function addDate(index) {
-    console.log(formData);
     staffData[index.index].preferences.push("");
     setStaffData([...staffData]);
   }
