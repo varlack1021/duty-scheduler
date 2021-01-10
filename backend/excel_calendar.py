@@ -19,15 +19,15 @@ class Excel_Calendar:
 		self.filename = filename + '.xlsx'
 		self.path = Path(EXCEL_FOLDER_PATH) / self.filename
 
-	def create_excel_calendar(self, year):
+	def create_excel_calendar(self, date_range):
 		calendar.setfirstweekday(firstweekday=6)
 		workbook = xlsxwriter.Workbook(self.path)
 
-		# Traveling for 12 months
-
-		for i in range(1, 13):
+		for date in sorted(list(date_range)):
 			# Add worksheets
-			month_name = calendar.month_name[i]
+			year = date.year
+			month = date.month
+			month_name = calendar.month_name[date.month]
 			worksheet = workbook.add_worksheet(month_name)
 			worksheet.set_column('A:H',20)
 			worksheet.set_row(1, 20)
@@ -57,7 +57,7 @@ class Excel_Calendar:
 			day_format.set_align('center')
 			
 			title_format.set_font_size(35)
-			title_format.set_bg_color(month_styles[i])
+			title_format.set_bg_color(month_styles[month])
 			title_format.set_font_name('Rockwell')
 			title_format.set_align('vcenter')
 
@@ -69,14 +69,14 @@ class Excel_Calendar:
 			# Get the exact date and time
 			fill_in = False
 
-			for j in range(len(calendar.monthcalendar(year, i))):
+			for j in range(len(calendar.monthcalendar(year, month))):
 				
 
 				worksheet.set_row(j + 3 + step, 45)
 
-				for k in range(len(calendar.monthcalendar(year, i)[j])):
+				for k in range(len(calendar.monthcalendar(year, month)[j])):
 
-					value = calendar.monthcalendar(year, i)[j][k]
+					value = calendar.monthcalendar(year, month)[j][k]
 					
 					if value != 0:
 						worksheet.write(j + 2 + step, k, value, date_format)
@@ -98,7 +98,7 @@ class Excel_Calendar:
 				worksheet.write(1, k3, days[k3], day_format)
 				worksheet.write(0, k3, '', title_format)
 			
-			month_name = calendar.month_name[i]
+			month_name = calendar.month_name[month]
 			worksheet.write(0, 0, "{}  {}".format(month_name, year), title_format)
 		
 		# Add Total Duty Dates Headers
@@ -111,21 +111,21 @@ class Excel_Calendar:
 		# Save Documents
 		workbook.close()
 
-	def write_to_excelsheet(self, duty_dates, total_days, months, year):
+	def write_to_excelsheet(self, duty_dates, total_days, date_range):
 	    '''
 	    Creates and writes to excel sheet
 	    The algorithm iterates through the cells in the excel sheet that have a date.
 	    The algo checks if the date is inlcuded in scheduled duty dates
 	    '''
-	    self.create_excel_calendar(year)
+	    self.create_excel_calendar(date_range)
 	    path = self.path
 	    #wb = xlrd.open_workbook(loc)
 
 	    write_wb = load_workbook(self.path)
 	    read_wb = xlrd.open_workbook(self.path)
 
-	    for month_number in months:
-	        datetime_object = datetime.strptime(month_number, "%m")
+	    for month_number in [date.month for date in date_range]:
+	        datetime_object = datetime.strptime(str(month_number), "%m")
 	        month_name = datetime_object.strftime('%B')
 	        write_sheet = write_wb[month_name]
 	        read_sheet = read_wb.sheet_by_name(month_name)

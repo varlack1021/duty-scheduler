@@ -19,7 +19,7 @@ def remove_excel_files_from_downloads():
 	
 	for file in path.iterdir():
 		
-		if file.suffix == '.xlsx':
+		if file.suffix in ['.xlsx', '.html']:
 
 			if 'Duty' in str(file):
 				file.unlink()

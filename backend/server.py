@@ -5,7 +5,7 @@ from flask_apscheduler import APScheduler
 from flask_cors import CORS 
 from flask import Flask, request, make_response, redirect, url_for, send_from_directory, send_file
 
-from backend.scheduler import Scheduler
+from scheduler import Scheduler
 
 from pathlib import Path
 from datetime import datetime, timedelta
