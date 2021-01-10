@@ -4,7 +4,8 @@ import calendar
 import pandas as pd
 import datetime as dt
 from collections import defaultdict
-from excel_calendar import Excel_Calendar
+from backend.excel_calendar import Excel_Calendar
+from backend.word_table_calendar import WordTable
 
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
@@ -22,7 +23,7 @@ class Scheduler:
         self.duty_dates = defaultdict(dict)
         self.staff = [staff_member['name'] for staff_member in payload['staffData'] ] + [NO_ASSIGNMENT]
         self.preferences = {staff_member['name']: staff_member['preferences'] for staff_member in payload['staffData']}
-        self.duty_type = payload.get('duty_type')
+        self.ra_duty = payload['raDuty']
 
     # ---------Algorithm functions--------------------  
     def assign_staff_member_to_day(self, date, day_type):
@@ -30,8 +31,7 @@ class Scheduler:
         current_RA_index = None
         RA = staff_names[current_index[day_type]]
         mod = len(self.preferences)
-
-        date_obj = dt.datetime.strptime(date, '%Y-%m-%d')
+        date_obj = dt.datetime.strptime(date.split(' - ')[0], '%Y-%m-%d')
         month = date_obj.month
         day = date_obj.day
         
@@ -43,7 +43,7 @@ class Scheduler:
 
         #-----------------Algorithm----------------------------------------
         #This algo assigns an RA
-        while (date in self.preferences[RA]                             or 
+        while (any(x in date for x in self.preferences[RA])                             or 
                self.duty_dates[RA][day_type] >= total_days[day_type]    
                ):
       
@@ -71,6 +71,48 @@ class Scheduler:
 
         return RA
 
+    #-----------RD Functions------------------
+    def assign_rd_to_block(self):
+        for date in self.duty_dates:
+            if self.duty_dates[date] in ['weekends', 'weekdays']:
+                day_type = self.duty_dates[date]
+                RD = self.assign_staff_member_to_day(date, day_type)
+                self.duty_dates[date] = RD
+                self.duty_dates[RD][day_type] += 1
+
+    def rd_date_setup(self):
+        message = "weekdays"
+        days = 3
+        
+        while self.start_date < self.end_date:
+            shift_start = str(self.start_date).rstrip('00:00:00').rstrip()
+            shift_end = str(self.start_date + dt.timedelta(days)).rstrip('00:00:00').rstrip()
+            
+            shift = "{} - {}".format(shift_start, shift_end)
+            self.duty_dates[shift] = message
+            self.start_date += dt.timedelta(days)
+            
+            if days == 3:
+                days += 1
+                message = "weekdays"
+            else:
+                days -= 1
+                message = "weekends"
+
+        for ra in self.staff:
+            if 'weekdays' not in self.duty_dates[ra]:
+                self.duty_dates[ra]['weekdays'] = 0
+                self.duty_dates[ra]['weekends'] = 0
+
+    def decompose_rd_duty_dates(self):
+        total_duty_dates = defaultdict(dict)
+        
+        total_duty_dates = {key:value for key, value in self.duty_dates.items() if key in self.staff}
+        duty_dates = {key:value for key, value in self.duty_dates.items() if key not in self.staff}
+
+        return duty_dates, total_duty_dates
+
+    #------------RA Functions--------------------
     def assign_ra_by_month(self):        
         for date in self.month_range:
             weekdays, weekends = self.create_calendar(date)
@@ -121,7 +163,7 @@ class Scheduler:
                 self.duty_dates[ra]['weekends'] = 0
 
     #----- Sorts duty dates by month -----
-    def decompose_duty_dates(self):
+    def decompose_ra_duty_dates(self):
         duty_dates_by_month = defaultdict(dict)
         total_duty_dates = defaultdict(dict)
         for date in self.month_range:
@@ -159,17 +201,24 @@ class Scheduler:
             print('''{} has {} days of weekdays duty and {} days of weekends duty.'''
                 .format(RA, self.duty_dates[RA]['weekdays'], self.duty_dates[RA]['weekends']))
 
-    #---- Main function ----
-    def start_schedule(self):
-
-        cleanup = False
-        if cleanup:
-            if os.path.exists(self.filename + ".xlsx"):
-                os.remove(self.filename + ".xlsx")
-
+    #---- Main functions ----
+    def schedule_ra_duty(self):
         self.assign_ra_by_month()
-        self.duty_dates, total_days = self.decompose_duty_dates()
+        self.duty_dates, total_days = self.decompose_ra_duty_dates()
         
         excel_obj_tool = Excel_Calendar(self.filename)
         excel_obj_tool.write_to_excelsheet(self.duty_dates, total_days, self.month_range)
-    
+
+    def schedule_rd_duty(self):
+        self.rd_date_setup()
+        self.assign_rd_to_block() 
+        duty_dates, total_duty_dates = self.decompose_rd_duty_dates()
+
+        word_table = WordTable(duty_dates, total_duty_dates)
+        word_table.write_to_table()
+
+    def start_schedule(self):
+        if self.ra_duty:
+            self.schedule_ra_duty()
+        else:
+            self.schedule_rd_duty()
