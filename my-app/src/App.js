@@ -12,6 +12,7 @@ function App() {
     startDate: "",
     endDate: "",
     doubleDuty: false,
+    raDuty: true,
   });
 
   let [staffData, setStaffData] = useState([
@@ -68,16 +69,25 @@ function App() {
 
   return (
     <div className="App">
-      <p className="Seperation">
-        This text is to have a component between the first component I want
-        padding and the top
-      </p>
       <h1 className="App-header"> Residence Life Auto Duty Scheduler </h1>
       <Container className="Form-Format">
         <Form onSubmit={(formEvent) => sendFormData(formEvent)}>
           <Form.Label className="Scheduling-options" style={{marginBottom: '20px'}}>
             Duty Scheduling Options
           </Form.Label>
+          <Form.Row className="RD-duty-checkbox"> 
+                <Form.Check
+                  type="checkBox"
+                  label="RD Duty (Leave Unchecked for RA Duty)"
+                  className="doubleDuty-checkBox"
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      raDuty: !formData.raDuty,
+                    })
+                  }
+                />
+          </Form.Row>
           <Form.Row>
             <Form.Group>
               <Form.Label>Start Date</Form.Label>

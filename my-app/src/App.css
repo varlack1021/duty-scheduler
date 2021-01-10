@@ -8,23 +8,21 @@
 }
 
 .App-header {
-  background-color: ;
-  padding: 20px;
+  padding: 30px;
   text-align: center;
   margin-left: 20px;
   margin-right: 20px;
   border-radius: 15px;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-size: calc(15px + 2vmin);
   color: #ff944d;
 }
 
-.Seperation {
-  .opacity: 0%;
-  font-size: 1px;
+.RD-duty-checkbox {
+  margin-bottom: 15px;
+  font-size: 10px;
 }
-
 .Form-Format {
   display: flex;
   flex-direction: column;
@@ -35,11 +33,11 @@
 }
 .Scheduling-options {
   text-decoration: underline;
-  margin-top: 25px;
+  margin-top: 5px;
 }
 
 .Staff-members {
-  margin-top: 50px;
+  margin-top: 45px;
   text-decoration: underline;
 }
 
@@ -66,7 +64,6 @@
 }
 
 .Footer {
-  background-color: ;
   border-radius: 15px;
   margin-top: 75px;
   margin-bottom: 10px;
