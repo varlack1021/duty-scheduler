@@ -4,8 +4,8 @@ import calendar
 import pandas as pd
 import datetime as dt
 from collections import defaultdict
-from backend.excel_calendar import Excel_Calendar
-from backend.word_table_calendar import WordTable
+from excel_calendar import Excel_Calendar
+from word_table_calendar import WordTable
 
 current_index = {'weekends': 0, 'weekdays':0}
 total_days = {'weekends': 0, 'weekdays': 0}
@@ -214,7 +214,7 @@ class Scheduler:
         self.assign_rd_to_block() 
         duty_dates, total_duty_dates = self.decompose_rd_duty_dates()
 
-        word_table = WordTable(duty_dates, total_duty_dates)
+        word_table = WordTable(duty_dates, total_duty_dates, self.filename)
         word_table.write_to_table()
 
     def start_schedule(self):

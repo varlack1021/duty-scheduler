@@ -1,23 +1,29 @@
 from docx import Document
 from docx.shared import Inches
-from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-import os
-from pathlib import Path
 from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+from collections import OrderedDict
+from pathlib import Path
 import calendar
 import datetime as dt
-from pprint import pprint
-from collections import OrderedDict
+import os
 
+
+
+HEADER_FILL = '5b95f9'
+COLOR1 = 'ffffff'
+COLOR2 = 'B6CFFC'
 
 class WordTable():
 
-	def __init__(self, duty_dates, total_days):
+	def __init__(self, duty_dates, total_days, filename):
 		self.duty_dates = OrderedDict(zip(list(map(self.convert_dates_to_text, duty_dates.keys())), duty_dates.values()))
 		self.total_days = total_days
-		
+		self.path = Path('backend/word_files/') / (filename + ".docx")
+
 	def convert_dates_to_text(self, date_string):
 		shift_start, shift_end = list(map(lambda x : dt.datetime.strptime(x, '%Y-%m-%d'), date_string.split(' - ')))
 		shift_start_text = "{} {}".format(calendar.month_name[shift_start.month], shift_start.day)
@@ -27,66 +33,50 @@ class WordTable():
 		return text
 		
         
-	
 	def write_to_table(self):
-
-		path = Path('backend/word_files/test.docx')
-		print(path.resolve)
 		document = Document()
-
+		
+		rows = len(self.duty_dates)
 		styles = document.styles
-		table = document.add_table(rows = 15, cols = 5)
+		table = document.add_table(rows = rows + 1, cols = 5)
 		table.style = styles['Table Grid']
-
-		header_cells = table.rows[0].cells
 		headers = ['Week', 'Dates', 'RD', 'Management', 'Central Office']
 
-		#Fill Header
+		#-----Table Formatting-----
+		for i in range(1, len(table.rows), 2):
+			row = table.rows[i].cells[3]
+			row2 = table.rows[i + 1].cells[3]
+
+			row.merge(row2)
+
+		table.cell(0, 1).width = Inches(2.5)
+		table.cell(0, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+		
+		for cell in range(5):
+			header_fill = parse_xml(r'<w:shd {} w:fill="{}"/>'.format(nsdecls('w'), HEADER_FILL))
+			table.rows[0].cells[cell]._tc.get_or_add_tcPr().append(header_fill)
+
+		for i in range(1, rows, 2):
+			row = table.rows[i]
+			
+			for j in range(5):
+				cell_fill = parse_xml(r'<w:shd {} w:fill="{}"/>'.format(nsdecls('w'), COLOR1))
+				row.cells[j]._tc.get_or_add_tcPr().append(cell_fill)
+
+		#-----Fill Header Info-----
 		for i in range(5):
 			text = headers[i]
 			p = table.rows[0].cells[i].add_paragraph(text + "\n")
 			p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-			
-			#black_fill = parse_xml(r'<w:shd {} w:fill="000000"/>'.format(nsdecls('w')))
-			
-			#table.rows[0].cells[i]._tc.get_or_add_tcPr().append(black_fill)
 		
+		#------Write to Table-------
 		for i in range(len(self.duty_dates.items())):
 			date_info = list(self.duty_dates.items())[i]
 			row_info = ["Week %s" % (i + 1), date_info[0], date_info[1]]
-			
+
 			for j in range(len(row_info)):
-				p = table.rows[i + 1].cells[j].add_paragraph(row_info[j])
-				p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-		
-		print(os.path.realpath(__file__))
-		document.save(path)
-		os.startfile(path) 
-		'''
-		shading_elm_2 = parse_xml(r'<w:shd {} w:fill="1F5C8B"/>'.format(nsdecls('w')))
-		#hdr_cells[0]._tc.get_or_add_tcPr().append(shading_elm_2)
-		#hdr_cells[1]._tc.get_or_add_tcPr().append(shading_elm_2)
-		#hdr_cells[0].text = 'ID'
-		#p = hdr_cells[1].add_paragraph('Quantity')
+				table.rows[i + 1].cells[j].text = row_info[j]
+				header_fill = parse_xml(r'<w:shd {} w:fill="5b95f9"/>'.format(nsdecls('w')))
 
-		#	p.alignment=WD_ALIGN_PARAGRAPH.CENTER
-
-
-		for i in range(1, 10):
-			row_cells = table.rows[i].cells
-			row_cells[0].text = ""
-			row_cells[1].text = "She"
-			row_cells[2].text = "Cutie"
-
-		row_cells = table.rows[4].cells
-
-		row_cells[0].merge(row_cells[1])
-
-		
-
-
-		print(path)
-
-		print(os.path.exists(path))
-		'''
-		
+		document.save(self.path)
+		os.startfile(self.path) 
