@@ -7,10 +7,9 @@ from collections import defaultdict
 from backend.excel_calendar import Excel_Calendar
 from backend.word_table_calendar import WordTable
 
-current_index = {'weekends': 0, 'weekdays':0}
-total_days = {'weekends': 0, 'weekdays': 0}
 NO_ASSIGNMENT = 'unable to assign'
-
+dic = {'test': 1}
+test = 1
 
 class Scheduler:
 
@@ -24,27 +23,29 @@ class Scheduler:
         self.staff = [staff_member['name'] for staff_member in payload['staffData'] ] + [NO_ASSIGNMENT]
         self.preferences = {staff_member['name']: staff_member['preferences'] for staff_member in payload['staffData']}
         self.ra_duty = payload['raDuty']
+        self.current_index = {'weekends': 0, 'weekdays':0}
+        self.total_days = {'weekends': 0, 'weekdays': 0}
 
     # ---------Algorithm functions--------------------  
     def assign_staff_member_to_day(self, date, day_type):
         staff_names = list(self.preferences.keys())
         current_RA_index = None
-        RA = staff_names[current_index[day_type]]
+        RA = staff_names[self.current_index[day_type]]
         mod = len(self.preferences)
         date_obj = dt.datetime.strptime(date.split(' - ')[0], '%Y-%m-%d')
         month = date_obj.month
         day = date_obj.day
+        print(self.current_index)
+        next_available_RA_index = (self.current_index[day_type] + 1) % mod
+        current_RA_index = self.current_index[day_type]
         
-        next_available_RA_index = (current_index[day_type] + 1) % mod
-        current_RA_index = current_index[day_type]
-        
-        if current_index[day_type] == 0:
-            total_days[day_type] += 1
+        if self.current_index[day_type] == 0:
+            self.total_days[day_type] += 1
 
         #-----------------Algorithm----------------------------------------
         #This algo assigns an RA
-        while (any(x in date for x in self.preferences[RA])                             or 
-               self.duty_dates[RA][day_type] >= total_days[day_type]    
+        while (any(x in date for x in self.preferences[RA])                 or 
+               self.duty_dates[RA][day_type] >= self.total_days[day_type]    
                ):
       
             RA = staff_names[next_available_RA_index]
@@ -66,8 +67,8 @@ class Scheduler:
                         break 
                 break
 
-        current_index[day_type] += 1
-        current_index[day_type] %= mod
+        self.current_index[day_type] += 1
+        self.current_index[day_type] %= mod
 
         return RA
 
