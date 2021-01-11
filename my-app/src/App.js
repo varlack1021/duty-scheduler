@@ -1,4 +1,4 @@
-import React, {useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
@@ -43,7 +43,7 @@ function App() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(await response.blob());
 
-    link.download = formData.hall.concat(' ', 'Duty Calendar');
+    link.download = formData.hall.concat(" ", "Duty Calendar");
     link.href = url;
     document.body.appendChild(link);
     link.click();
@@ -72,21 +72,24 @@ function App() {
       <h1 className="App-header"> Residence Life Auto Duty Scheduler </h1>
       <Container className="Form-Format">
         <Form onSubmit={(formEvent) => sendFormData(formEvent)}>
-          <Form.Label className="Scheduling-options" style={{marginBottom: '20px'}}>
+          <Form.Label
+            className="Scheduling-options"
+            style={{ marginBottom: "20px" }}
+          >
             Duty Scheduling Options
           </Form.Label>
-          <Form.Row className="RD-duty-checkbox"> 
-                <Form.Check
-                  type="checkBox"
-                  label="RD Duty (Leave Unchecked for RA Duty)"
-                  className="doubleDuty-checkBox"
-                  onClick={() =>
-                    setFormData({
-                      ...formData,
-                      raDuty: !formData.raDuty,
-                    })
-                  }
-                />
+          <Form.Row className="RD-duty-checkbox">
+            <Form.Check
+              type="checkBox"
+              label="RD Duty (Leave Unchecked for RA Duty)"
+              className="doubleDuty-checkBox"
+              onClick={() =>
+                setFormData({
+                  ...formData,
+                  raDuty: !formData.raDuty,
+                })
+              }
+            />
           </Form.Row>
           <Form.Row>
             <Form.Group>
@@ -146,8 +149,20 @@ function App() {
               </Col>
             </Form.Group>
           </Form.Row>
-          <Form.Label className="Staff-members" style={{marginBottom: '15px'}}>Staff Members </Form.Label>
-
+          <Form.Label
+            className="Staff-members"
+            style={{ marginBottom: "15px" }}
+          >
+            Staff Members{" "}
+          </Form.Label>
+          {formData["raDuty"] === false && (
+            <p style={{ fontSize: 18 }}>
+              Please enter in the date of the specific shift you do not want to
+              sit. <br />
+              For example week 1 starts on Jan 18 so you would input Jan 18.{" "}
+              <br />
+            </p>
+          )}
           {staffData.map((data, index) => (
             <React.Fragment>
               <Form.Row>
@@ -195,7 +210,7 @@ function App() {
                   </Col>
                 </Form.Group>
               </Form.Row>
-              <Form.Label>Days Cannot Sit</Form.Label>
+              <Form.Label>{formData['raDuty'] === true ? "Days" : "Weeks"} Cannot Sit</Form.Label>
               <Form.Row>
                 {staffData[index].preferences.map((input, index2) => (
                   <React.Fragment>
@@ -241,7 +256,7 @@ function App() {
                   <Button
                     variant="danger"
                     onClick={() => removeStaffMember({ index })}
-                    style = {{marginBottom: '35px'}}
+                    style={{ marginBottom: "35px" }}
                   >
                     Remove Staff Member
                   </Button>

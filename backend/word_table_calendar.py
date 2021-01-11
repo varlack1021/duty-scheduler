@@ -14,8 +14,7 @@ import os
 
 
 HEADER_FILL = '5b95f9'
-COLOR1 = 'ffffff'
-COLOR2 = 'B6CFFC'
+COLOR1 = 'B6CFFC'
 
 class WordTable():
 
@@ -79,4 +78,3 @@ class WordTable():
 				header_fill = parse_xml(r'<w:shd {} w:fill="5b95f9"/>'.format(nsdecls('w')))
 
 		document.save(self.path)
-		os.startfile(self.path) 
