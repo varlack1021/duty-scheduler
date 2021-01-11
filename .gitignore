@@ -3,6 +3,7 @@ __pycache__/
 credentials.json
 *.png
 *.txt
+*.docx
 
 token.pickle
 microsoft_graph.py

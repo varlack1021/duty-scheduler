@@ -35,18 +35,20 @@ class WordTable():
 	def write_to_table(self):
 		document = Document()
 		
-		rows = len(self.duty_dates)
+		rows = len(self.duty_dates) + 1
 		styles = document.styles
-		table = document.add_table(rows = rows + 1, cols = 5)
+		table = document.add_table(rows = rows, cols = 5)
 		table.style = styles['Table Grid']
 		headers = ['Week', 'Dates', 'RD', 'Management', 'Central Office']
 
 		#-----Table Formatting-----
-		for i in range(1, len(table.rows), 2):
+		for i in range(1, rows, 2):
 			row = table.rows[i].cells[3]
-			row2 = table.rows[i + 1].cells[3]
-
-			row.merge(row2)
+			try:
+				row2 = table.rows[i + 1].cells[3]
+				row.merge(row2)
+			except IndexError:
+				pass
 
 		table.cell(0, 1).width = Inches(2.5)
 		table.cell(0, 1).vertical_alignment = WD_ALIGN_VERTICAL.CENTER
