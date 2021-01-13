@@ -8,8 +8,6 @@ from backend.excel_calendar import Excel_Calendar
 from backend.word_table_calendar import WordTable
 
 NO_ASSIGNMENT = 'unable to assign'
-dic = {'test': 1}
-test = 1
 
 class Scheduler:
 
@@ -25,7 +23,7 @@ class Scheduler:
         self.ra_duty = payload['raDuty']
         self.current_index = {'weekends': 0, 'weekdays':0}
         self.total_days = {'weekends': 0, 'weekdays': 0}
-
+    
     # ---------Algorithm functions--------------------  
     def assign_staff_member_to_day(self, date, day_type):
         staff_names = list(self.preferences.keys())
@@ -35,7 +33,6 @@ class Scheduler:
         date_obj = dt.datetime.strptime(date.split(' - ')[0], '%Y-%m-%d')
         month = date_obj.month
         day = date_obj.day
-        print(self.current_index)
         next_available_RA_index = (self.current_index[day_type] + 1) % mod
         current_RA_index = self.current_index[day_type]
         
@@ -44,10 +41,10 @@ class Scheduler:
 
         #-----------------Algorithm----------------------------------------
         #This algo assigns an RA
-        while (any(x in date for x in self.preferences[RA])                 or 
+        while  (date in self.preferences[RA] or 
                self.duty_dates[RA][day_type] >= self.total_days[day_type]    
                ):
-      
+        
             RA = staff_names[next_available_RA_index]
             next_available_RA_index += 1
             next_available_RA_index %= mod
@@ -69,7 +66,6 @@ class Scheduler:
 
         self.current_index[day_type] += 1
         self.current_index[day_type] %= mod
-
         return RA
 
     #-----------RD Functions------------------
@@ -119,13 +115,11 @@ class Scheduler:
             weekdays, weekends = self.create_calendar(date)
             self.add_month_to_duty_dates(date)
             month = date.month
-
             for day in weekdays:
                 dt = "{}-{:02d}-{:02d}".format(date.year, date.month, day)
                 RA = self.assign_staff_member_to_day(dt, 'weekdays')
                 self.duty_dates[RA][month].append(day)
                 self.duty_dates[RA]['weekdays'] += 1
-
             for day in weekends:
                 dt = "{}-{:02d}-{:02d}".format(date.year, date.month, day)
                 RA = self.assign_staff_member_to_day(dt, 'weekends')

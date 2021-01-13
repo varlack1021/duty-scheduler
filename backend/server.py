@@ -33,6 +33,7 @@ def schedule_duty():
 	if payload['raDuty']:
 		return send_from_directory(app.config['EXCEL_FILES'], scheduler.filename + ".xlsx", as_attachment=True)
 	return send_from_directory(app.config['WORD_FILES'], scheduler.filename + ".docx", as_attachment=True)
+
 if __name__ == "__main__":
 	app.run(host='localhost', debug=True, port=8000)
 
