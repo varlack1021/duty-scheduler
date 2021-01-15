@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
@@ -23,8 +23,12 @@ function App() {
     },
   ]);
 
+  let [isLoading, setLoading] = useState(false);
+
   const sendFormData = async (formEvent) => {
     formEvent.preventDefault();
+    setLoading(true)
+
     formData.staffData = staffData;
     const requestOptions = {
       method: "POST",
@@ -48,6 +52,8 @@ function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    setLoading(false)
   };
 
   //For Some reason I have to use funcs to increase the size of my states
@@ -267,8 +273,8 @@ function App() {
 
           <Form.Row className="submit-row">
             <Form.Group>
-              <Button variant="primary" type="submit">
-                Submit
+              <Button variant="primary" type="submit" disabled={isLoading}>
+                {isLoading ? 'Loading...' : 'Submit'}
               </Button>
             </Form.Group>
             <Form.Group>
