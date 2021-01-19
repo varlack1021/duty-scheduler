@@ -1,36 +1,16 @@
-#Issues
-- What happens if a blank date is selected -Fixed
-- What happens if someone clicks on submit but wants to add to the form -Fixed
-- If no one can sit a day - Fixed
-- What happens if a huge date is selected
-    + Write down the current capabilities i. December-January (different Years)
-- Refactor code for readability and shy away from using ints instead of dateobjects
-- Google refresh tokens
-- Equality if we pick month by month
+#Overview
+- This website was made at the request of the Office of Residence Life at the State University of New York. I work for the department as an Resident Assistant (RA) and one of our responsibilities is being on call in the office every night. The traditional way we would schedule shifts is very robust. We would literally go in a circle and pick which shifts we wanted. As can be imagined, this is a very tedious job as this can be very time conusming especially if we are scheduling shifts for months at a time. So I decided to automate the process! What once took hours now takes mere seconds.
 
-###Features to implement
-- End Date -Done
-- Add the total amount of days sat to a sheet in excel. -Done
-    - I need to figure out a proper name for this sheet. 
-        + Duty Calendar
-- Require to fillout Name, Start and End Date Fields -Done
-- Option to remove staff member -Done
-- Double duty -Done
-- SRA dates
-    + Ask Luke about this
-    + SRA sits once a week
-    + Half weekends, half weekdays
-- Make the website look pretty
-- RD on call options
-- Should I give them a day range?
-     
-##User Experience
-- Should I Have them include filename? -No
-- Should I be able to take input as to how many days people have already sat?
+#Development
+- The algorithm I developed to simulate shift picking aims to even out the amount of days everyone sits and takes into account the days that people do not want to sit (like if someone did not want to sit on their birthday). 
+- The output is a formatted excel sheet or word sheet with all the shifts and who is assigned to each shift.
 
-##Inquires
-- Javascript () => functions which must be used in onClick event handlers
-- Immutable dics
-- Python multiprocessing, like how does that shit work, this can be really fuckinc cool
-- Best Practices, should I let the user name the file
-- Why do we use list on dic.keys()?
+- There are two types of shits, Resident Assistant (RA) shifts and Resident Director (RD) shifts. 
+
+#Usage
+- The website allows the user the start and end date for how overall period they want to schedule shifts.
+- The user can dynamically enter names and days that each staff member does not want to work
+- The user can choose what type of scheduling it is for, either RD or RA
+- The output is an excel file for Resident Assistants and a word document for RD's
+- Output contains all the shifts, who is sitting what shift and the amount of shifts each person is sitting
+
